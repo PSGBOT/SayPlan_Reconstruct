@@ -91,7 +91,7 @@ class SceneGraphDatabase:
             self.instanceNodes[instanceID] = instanceNode
             self.instancesGraph.add_node(instanceID, node=instanceNode)
         for relationship in sceneGraph.get("relationships", []):
-            subject = relationship.get("relationship", "")
+            subject = relationship.get("subject", "")
             object = relationship.get("object", "")
             predicate = relationship.get("predicate", "")
             self.instancesGraph.add_edge(subject, object, predicate=predicate)
