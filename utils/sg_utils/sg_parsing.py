@@ -2,18 +2,23 @@ import json
 import networkx as nx
 from collections import defaultdict
 import pandas as pd
+import copy
 
 class Node():
     """
-    Used for representation of both instance and part.
-    nodeID: unique id of the instance/part. Instance id will be an string index; Part id will be sample_{x}_mask{y}
-    nodeType: the name of the instance/part
-    parts: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described in this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts.
+    EFFECT: 
+        Used for representation of both instance and part.
+    ATTRIBUTES: 
+        nodeID: unique id of the instance/part. Instance id will be an string index; Part id will be sample_{x}_mask{y}
+        nodeType: the name of the instance/part
+        parts: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described in this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts.
+        partNodes: a dict that stores all the parts of this node
     """
-    def __init__(self, nodeID: str = "-1", nodeType: str = "null", parts: nx.DiGraph = nx.DiGraph()):
+    def __init__(self, nodeID: str = "-1", nodeType: str = "null", parts: nx.DiGraph = nx.DiGraph(), partNodes = {}):
         self.nodeID = nodeID
         self.nodeType = nodeType
         self.parts = parts
+        self.partNodes = partNodes
     
 def recursive_tree_constructor(part) -> Node:
     """
@@ -46,7 +51,7 @@ def recursive_tree_constructor(part) -> Node:
                 joint_type=kinematicRelation.get("joint_type", ""),
                 controllable=kinematicRelation.get("controllable", ""),
                 root=kinematicRelation.get("root", ""),
-                subject_function=kinematicRelation.get("subjectt_function", []),
+                subject_function=kinematicRelation.get("subject_function", []),
                 object_function=kinematicRelation.get("object_function", []),
                 subject_desc=kinematicRelation.get("subject_desc", ""),
                 object_desc=kinematicRelation.get("object_desc", "")
@@ -54,7 +59,8 @@ def recursive_tree_constructor(part) -> Node:
     instanceNode = Node(
         nodeID=str(instanceID),
         nodeType=instanceType,
-        parts=partGraph
+        parts=partGraph,
+        partNodes=partNodes
     )
     return instanceNode
 
@@ -64,12 +70,14 @@ class SceneGraphDatabase:
         INPUT: 
             sceneGraph: loaded json 
         ATTRIBUTES:
-            instancesGraph: an nx.DiGraph, nodes will be instances in the scene graph, edges will be instance level relations
+            instancesGraph: an nx.DiGraph. Nodes will be instances in the scene graph; Edges will be instance level relations
+            instanceNodes: a dict. Stores all the instance-level objectsd. Helps in LLM pruning for task planning
         """
         self.instancesGraph = nx.DiGraph()
+        self.instanceNodes = {}
         if sceneGraph:
             self.load_from_scene_graph(sceneGraph)
-    
+            
     def load_from_scene_graph(self, sceneGraph):
         """
         INPUT: 
@@ -77,11 +85,10 @@ class SceneGraphDatabase:
         EFFECT: 
             Construct the objects graph based on the input loaded json. The object-part tree would be constructed recursively.
         """
-        instanceNodes = {}
         for instance in sceneGraph.get("objects", []):
             instanceNode = recursive_tree_constructor(instance)
             instanceID = instanceNode.nodeID
-            instanceNodes[instanceID] = instanceNode
+            self.instanceNodes[instanceID] = instanceNode
             self.instancesGraph.add_node(instanceID, node=instanceNode)
         for relationship in sceneGraph.get("relationships", []):
             subject = relationship.get("relationship", "")
