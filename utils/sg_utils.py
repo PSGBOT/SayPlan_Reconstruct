@@ -6,18 +6,18 @@ import copy
 
 class Node():
     """
-    EFFECT: 
+    EFFECTS: 
         Used for representation of both instance and part.
     ATTRIBUTES: 
         nodeID: unique id of the instance/part. Instance id will be an string index; Part id will be sample_{x}_mask{y}
         nodeType: the name of the instance/part
-        parts: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described in this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts.
+        partGraph: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described by this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts.
         partNodes: a dict that stores all the parts of this node
     """
-    def __init__(self, nodeID: str = "-1", nodeType: str = "null", parts: nx.DiGraph = nx.DiGraph(), partNodes = {}):
+    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.DiGraph = nx.DiGraph(), partNodes = {}):
         self.nodeID = nodeID
         self.nodeType = nodeType
-        self.parts = parts
+        self.partGraph = partGraph
         self.partNodes = partNodes
     
 def recursive_tree_constructor(part) -> Node:
@@ -41,13 +41,15 @@ def recursive_tree_constructor(part) -> Node:
         partNodes[partID] = partNode
         partGraph.add_node(partID, node=partNode)
     for kinematicRelation in kinematicRelations:
-        subject = kinematicRelation.get("subject", "")
-        obj = kinematicRelation.get("object", "")
+        subject = partNodes[kinematicRelation.get("subject", "")]
+        obj = partNodes[kinematicRelation.get("object", "")]
     
         if subject in partNodes and obj in partNodes:
             partGraph.add_edge(
                 subject,
                 obj,
+                subject=kinematicRelation.get("subject", ""),
+                object=kinematicRelation.get("object", ""),
                 joint_type=kinematicRelation.get("joint_type", ""),
                 controllable=kinematicRelation.get("controllable", ""),
                 root=kinematicRelation.get("root", ""),
@@ -59,7 +61,7 @@ def recursive_tree_constructor(part) -> Node:
     instanceNode = Node(
         nodeID=str(instanceID),
         nodeType=instanceType,
-        parts=partGraph,
+        partGraph=partGraph,
         partNodes=partNodes
     )
     return instanceNode
@@ -82,7 +84,7 @@ class SceneGraphDatabase:
         """
         INPUT: 
             sceneGraph: loaded json
-        EFFECT: 
+        EFFECTS: 
             Construct the objects graph based on the input loaded json. The object-part tree would be constructed recursively.
         """
         for instance in sceneGraph.get("objects", []):

@@ -1,14 +1,10 @@
-import base64
-from io import BytesIO
-from PIL import Image
-
 
 def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanceDict):
     """
     INPUTS:
         task: task for planning
         sceneGraphDatabase: SceneGraphDatabase type. Storing the scene graph
-        currentInstanceDict: a dict. Key: instance id; Value: pointer to its node in scene graph database. Storing the current kept instances/parts
+        currentInstanceDict: a dict. Key: instance id; Value: pointer to its node in scene graph database. Storing the current kept instances
     """
     instances = []
     instanceLevelRelations = []
@@ -42,21 +38,21 @@ The environment contains {len(instanceDescription)} objects, and their relations
 ## Your Task
 Select ONLY instances essential for completing the task. Consider:
 1. Direct relevance to task completion
-2. Functional parts that enable manipulation
-3. Kinematic constraints affecting the task
+2. Having relations that affect the task
+3. Having unneglegible relations with instances affecting the task
 4. Physical access requirements
 
 ## Selection Criteria
 INCLUDE instances that:
 - Are directly manipulated during the task
-- Contain functional parts required for the task
-- Provide kinematic constraints critical to task success
+- Have relations critical to task success
 - Serve as containers/platforms for target objects
 - Enable access to target components
 
 EXCLUDE instances that:
 - Are decorative or non-functional
-- Have no kinematic relevance to the task
+- Have no relation to the task
+- Have no relation to the instances essential to the task
 - Are not mentioned or implied in the task description
 - Would not be touched during task execution
 
@@ -64,14 +60,14 @@ EXCLUDE instances that:
 Return STRICTLY valid JSON with this structure:
 {{
   "reasoning": "Concise analysis (1-2 sentences)",
-  "selected_ids": ["inst_123", "inst_456", ...]
+  "selected_ids": ["id 1", "id 2", ...]
 }}
 
 ## Critical Rules
 - Select the MINIMAL necessary set
 - Use ONLY instance IDs from the 'Available Instances' section
 - DO NOT include any explanatory text outside the JSON
-- If no instances are needed, return: {{"selected_ids": []}}
+- If no instances are needed, return: {{""reasoning": "", selected_ids": []}}
 """.strip()
 
     return [
@@ -88,5 +84,81 @@ def decision_prune_graph_part_level(task, sceneGraphDatabase, currentInstanceDic
         sceneGraphDatabase: SceneGraphDatabase type. Storing the scene graph
         currentInstanceDict: a dict. Key: instance id; Value: pointer to its node in scene graph database. Storing the current kept instances/parts
     """
+    parts = []
+    partLevelRelations = []
+    for instanceID, node in currentInstanceDict.items():
+        partNodes = node.partNodes
+        partGraph = node.partGraph
+        for partID, partNode in partNodes.items():
+            partDescription = f"id: {partID}, type: {partNode.type}, from kept object id: {instanceID}, type: {node.type}"
+            parts.append(partDescription)
+        for _, _, data in partGraph.edges(data=True):
+            subject = data.get("subject", "")
+            object = data.get("object", "")
+            jointType = data.get("joint_type", "")
+            controllable = data.get("controllable", "")
+            root = data.get("root", "")
+            subjectFunction = data.get("subject_function", "")
+            objectFunction = data.get("object_function", "")
+            subjectDesc = data.get("subject_desc", "")
+            objectDesc = data.get("object_desc", "")
+            relationDescription = f"subject: {subject}, object: {object}, joint type: {jointType}, controllable: {controllable}, root: {root}, subject function: {subjectFunction}, object function: {objectFunction}, subject description: {subjectDesc}, object description: {objectDesc}"
+            partLevelRelations.append(relationDescription)
+    promptText = f"""
+# Robotic Task Planning: Instance Selection
 
-    
+## Task Objective
+{task}
+
+## Available Parts
+
+{";".join(parts)}
+
+## Kinematic Relationships among the Parts
+
+{";".join(partLevelRelations)}
+
+## Scene Graph Context
+Only parts of the kept instances and parts are listed in previous sections, and their relations are given
+
+## Your Task
+Select ONLY parts essential for completing the task. Consider:
+1. Direct relevance to task completion
+2. Having relations that affect the task
+3. Having unneglegible relations with instances or parts affecting the task
+4. Physical access requirements
+
+## Selection Criteria
+INCLUDE parts that:
+- Are directly manipulated during the task
+- Have relations critical to task success
+- Serve as containers/platforms for target objects
+- Enable access to target components
+
+EXCLUDE parts that:
+- Are decorative or non-functional
+- Have no relation to the task
+- Have no relation to the instances essential to the task
+- Are not mentioned or implied in the task description
+- Would not be touched during task execution
+
+## Output Format
+Return STRICTLY valid JSON with this structure:
+{{
+  "reasoning": "Concise analysis (1-2 sentences)",
+  "selected_ids": ["id 1", "id 2", ...]
+}}
+
+## Critical Rules
+- Select the MINIMAL necessary set
+- Use ONLY instance IDs from the 'Available Parts' section
+- DO NOT include any explanatory text outside the JSON
+- If no instances are needed, return: {{""reasoning": "", selected_ids": []}}
+""".strip()
+
+    return [
+        {
+            "role": "user",
+            "parts": [{"text": promptText}]
+        }
+    ]
