@@ -10,16 +10,18 @@ class Node():
         partGraph: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described by this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts.
         partNodes: a dict that stores all the parts of this node
     """
-    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.DiGraph = nx.DiGraph(), partNodes = {}):
+    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.DiGraph = nx.DiGraph(), partNodes = {}, owner: str = ""):
         self.nodeID = nodeID
         self.nodeType = nodeType
         self.partGraph = partGraph
         self.partNodes = partNodes
+        self.owner = owner
     
-def recursive_tree_constructor(part) -> Node:
+def recursive_tree_constructor(part, ownerID) -> Node:
     """
     INPUT: 
         part: JSON format description of the part
+        ownerID: str, father node; "" if adding nodes for instances
     EFFECTS:
         Recursively parse through the input json to construct the node
     OUTPUT: 
@@ -31,8 +33,8 @@ def recursive_tree_constructor(part) -> Node:
     partGraph = nx.DiGraph()
     partList = part.get("parts", [])
     partNodes = {}
-    for part in partList:
-        partNode = recursive_tree_constructor(part)
+    for subpart in partList:
+        partNode = recursive_tree_constructor(subpart, instanceID)
         partID = partNode.nodeID
         partNodes[partID] = partNode
         partGraph.add_node(partID, node=partNode)
@@ -58,7 +60,8 @@ def recursive_tree_constructor(part) -> Node:
         nodeID=str(instanceID),
         nodeType=instanceType,
         partGraph=partGraph,
-        partNodes=partNodes
+        partNodes=partNodes,
+        owner=ownerID
     )
     return instanceNode
 
@@ -84,7 +87,7 @@ class SceneGraphDatabase:
             Construct the objects graph based on the input loaded json. The object-part tree would be constructed recursively.
         """
         for instance in sceneGraph.get("objects", []):
-            instanceNode = recursive_tree_constructor(instance)
+            instanceNode = recursive_tree_constructor(instance, "")
             instanceID = instanceNode.nodeID
             self.instanceNodes[instanceID] = instanceNode
             self.instancesGraph.add_node(instanceID, node=instanceNode)

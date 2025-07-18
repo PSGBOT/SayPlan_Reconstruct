@@ -169,5 +169,48 @@ def task_planning(keptSG, sceneGraphDatabase, task: str):
         keptSG, list of dict
         sceneGraphDatabase: SceneGraphDatabase
         task: str, task
+    FIXME: add the kinematic relations into consideration. Proposed solution: update the kinematic relations for the previous level in each round
     """
-    pass
+    itemLists = []
+    for levelDict in keptSG:
+        itemList = []
+        for itemID, itemNode in levelDict.items():
+            if itemNode.owner == "":
+                itemDescription = f"id: {itemID}, type: {itemNode.type}, level: instance"
+            else:
+                itemDescription = f"id: {itemID}, type: {itemNode.type}, is part of: {itemNode.owner}"
+            itemList.append(itemDescription)
+        itemLists.append(itemList)
+    promptText = f"""
+# Robotic Task Planning: Instance Selection
+
+## Task Objective
+{task}
+
+## Task Related Environment
+
+{('\n'.join(';'.join(itemList) for itemList in itemLists))}
+
+## Your Task
+Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
+For each step include:
+1. Action verb (e.g., pick, place, navigate, open, close).
+2. Target object(s) or location(s) (use exact names from the environment list).
+3. Any pre-conditions or spatial constraints (e.g., “after opening the drawer”, “while holding the cup”).
+
+Format the plan as a numbered list:
+
+1. ...
+2. ...
+3. ...
+
+End with a short confirmation line: “Plan complete.”
+""".strip()
+
+    return [
+        {
+            "role": "user",
+            "parts": [{"text": promptText}]
+        }
+    ]
+    
