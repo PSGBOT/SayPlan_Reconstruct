@@ -1,4 +1,3 @@
-
 def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanceDict):
     """
     INPUTS:
@@ -77,7 +76,7 @@ Return STRICTLY valid JSON with this structure:
         }
     ]
 
-def decision_prune_graph_part_level(task, sceneGraphDatabase, currentInstanceDict):
+def decision_prune_graph_part_level(task, currentInstanceDict):
     """
     INPUTS:
         task: task for planning
@@ -162,3 +161,13 @@ Return STRICTLY valid JSON with this structure:
             "parts": [{"text": promptText}]
         }
     ]
+    
+    
+def task_planning(keptSG, sceneGraphDatabase, task: str):
+    """
+    INPUTS: 
+        keptSG, list of dict
+        sceneGraphDatabase: SceneGraphDatabase
+        task: str, task
+    """
+    pass
