@@ -18,58 +18,57 @@ class Pipeline():
     def __init__(self, sgPath: str, task: str = ""):
         with open(sgPath, 'r') as f:
             sceneGraph = json.load(f)   
+        if sceneGraph is None:
+            return 
         self.sceneGraphDatabase = sg_utils.SceneGraphDatabase(sceneGraph)
         self.keptSG = []
-        self.currentLevel = self.sceneGraphDatabase.instanceNodes
         self.task = task
         self.llmClient = GeminiVLMClient()
 
-
-    def get_pruned_level(self, llmOutputJson):
-        """
-        INPUTS: 
-            llmOutputJson: json format output.
-        EFFECTS: 
-            Update the keptSG, add the kept nodes in the current level; Update the currentLevel with nodes in the next level
-        OUTPUTS:
-            end: bool, false if llm outputs an empty json
-        """
-        selectedIDs = llmOutputJson.get("selected_ids", [])
-        if selectedIDs == []:
-            return False
-        levelDict = {}
-        nextLevelDict = {}
-        for selectedID in selectedIDs:
-            selectedNode = self.currentLevel[selectedID]
-            levelDict[selectedID] = selectedNode
-            nextLevelDict.update(selectedNode.partNodes)
-        self.keptSG.append(levelDict)
-        self.currentLevel = nextLevelDict
-        return True
-        
-    
+   
     def prune_graph(self):
         """
         EFFECTS:
-            Prune the environment graph with LLM
+            Prune the environment graph with LLM recursively
         """
-        instanceMsg = decision_prune_graph_instance_level(self.task, self.sceneGraphDatabase, self.currentLevel)
+        self.keptSG = []
+        instanceMsg = decision_prune_graph_instance_level(self.task, self.sceneGraphDatabase, self.sceneGraphDatabase.instanceNodes)
         instanceResult = self.llmClient.infer(instanceMsg)
-        prune = self.get_pruned_level(instanceResult)
-        while prune:
-            partMsg = decision_prune_graph_part_level(self.task, self.currentLevel)
-            partResult = self.llmClient.infer(partMsg)
-            prune = self.get_pruned_level(partResult)
+        selectedIDs = instanceResult.get("selected_ids", [])
+        for selectedID in selectedIDs:
+            selectedNode = self.sceneGraphDatabase.instanceNodes[selectedID]
+            self.recursive_prune_node(selectedNode)
+            self.keptSG.append(selectedID)
+
+            
+    def recursive_prune_node(self, instanceNode):
+        """
+        EFFECTS:
+            Helper function to prune the environment graph with LLM recursively, add nodes to nx.DiGraph.
+        """
+        instanceNode.keptSG = []
+        msg = decision_prune_graph_part_level(self.task, instanceNode)
+        result = self.llmClient.infer(msg)
+        selectedIDs = result.get("selected_ids", [])
+        for selectedID in selectedIDs:
+            selectedNode = instanceNode.partNodes[selectedID]
+            selectedNode.partGraph.add_node(selectedID, node=selectedNode)
+            self.recursive_prune_node(selectedNode)
+            instanceNode.keptSG.append(selectedID)
 
 
     def plan(self):
         """
         EFFECTS: 
             task planning
+        TODO: Add iterative re-planning, add kinematic tree to the re-planning only
         """
         planMsg = task_planning(self.keptSG, self.sceneGraphDatabase, self.task)
         plan = self.llmClient.infer(planMsg)
         return plan
+    
+    def replan(self):
+        pass
     
     def run(self):
         self.prune_graph()

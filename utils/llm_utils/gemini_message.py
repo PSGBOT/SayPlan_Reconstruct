@@ -1,3 +1,5 @@
+import json
+
 def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanceDict):
     """
     INPUTS:
@@ -76,33 +78,32 @@ Return STRICTLY valid JSON with this structure:
         }
     ]
 
-def decision_prune_graph_part_level(task, currentInstanceDict):
+def decision_prune_graph_part_level(task, currentInstance):
     """
     INPUTS:
         task: task for planning
         sceneGraphDatabase: SceneGraphDatabase type. Storing the scene graph
-        currentInstanceDict: a dict. Key: instance id; Value: pointer to its node in scene graph database. Storing the current kept instances/parts
+        currentInstance: a node in scene graph database. Storing the current kept instances/parts
     """
     parts = []
-    partLevelRelations = []
-    for instanceID, node in currentInstanceDict.items():
-        partNodes = node.partNodes
-        partGraph = node.partGraph
-        for partID, partNode in partNodes.items():
-            partDescription = f"id: {partID}, type: {partNode.type}, from kept object id: {instanceID}, type: {node.type}"
-            parts.append(partDescription)
-        for _, _, data in partGraph.edges(data=True):
-            subject = data.get("subject", "")
-            object = data.get("object", "")
-            jointType = data.get("joint_type", "")
-            controllable = data.get("controllable", "")
-            root = data.get("root", "")
-            subjectFunction = data.get("subject_function", "")
-            objectFunction = data.get("object_function", "")
-            subjectDesc = data.get("subject_desc", "")
-            objectDesc = data.get("object_desc", "")
-            relationDescription = f"subject: {subject}, object: {object}, joint type: {jointType}, controllable: {controllable}, root: {root}, subject function: {subjectFunction}, object function: {objectFunction}, subject description: {subjectDesc}, object description: {objectDesc}"
-            partLevelRelations.append(relationDescription)
+    # partLevelRelations = []
+    partNodes = currentInstance.partNodes
+    # partGraph = currentInstance.partGraph
+    for partID, partNode in partNodes.items():
+        partDescription = f"id: {partID}, type: {partNode.type}, from kept object id: {currentInstance.nodeID}, type: {currentInstance.type}"
+        parts.append(partDescription)
+    # for _, _, data in partGraph.edges(data=True):
+    #     subject = data.get("subject", "")
+    #     object = data.get("object", "")
+    #     jointType = data.get("joint_type", "")
+    #     controllable = data.get("controllable", "")
+    #     root = data.get("root", "")
+    #     subjectFunction = data.get("subject_function", "")
+    #     objectFunction = data.get("object_function", "")
+    #     subjectDesc = data.get("subject_desc", "")
+    #     objectDesc = data.get("object_desc", "")
+    #     relationDescription = f"subject: {subject}, object: {object}, joint type: {jointType}, controllable: {controllable}, root: {root}, subject function: {subjectFunction}, object function: {objectFunction}, subject description: {subjectDesc}, object description: {objectDesc}"
+    #     partLevelRelations.append(relationDescription)
     promptText = f"""
 # Robotic Task Planning: Instance Selection
 
@@ -112,10 +113,6 @@ def decision_prune_graph_part_level(task, currentInstanceDict):
 ## Available Parts
 
 {";".join(parts)}
-
-## Kinematic Relationships among the Parts
-
-{";".join(partLevelRelations)}
 
 ## Scene Graph Context
 Only parts of the kept instances and parts are listed in previous sections, and their relations are given
@@ -163,34 +160,47 @@ Return STRICTLY valid JSON with this structure:
     ]
     
     
+def recursive_add_item(node) -> dict:   
+    """
+    INPUTS: 
+        node, node
+    """
+    itemDict = {}
+    partList = []
+    for keptnode in node.keptSG:
+        partList.append(recursive_add_item(node.partNodes[keptnode]))
+    if node.owner == "":
+        itemDescription = f"id: {node.nodeID}, type: {node.type}, level: instance"
+    else:
+        itemDescription = f"id: {node.nodeID}, type: {node.type}"
+    itemDict["description"] = itemDescription
+    itemDict["parts"] = partList
+    return itemDict
+
 def task_planning(keptSG, sceneGraphDatabase, task: str):
     """
     INPUTS: 
         keptSG, list of dict
         sceneGraphDatabase: SceneGraphDatabase
         task: str, task
-    FIXME: add the kinematic relations into consideration. Proposed solution: update the kinematic relations for the previous level in each round
+    TODO: add the kinematic relations into consideration. Proposed solution: update the kinematic relations for the previous level in each round
     """
-    itemLists = []
-    for levelDict in keptSG:
-        itemList = []
-        for itemID, itemNode in levelDict.items():
-            if itemNode.owner == "":
-                itemDescription = f"id: {itemID}, type: {itemNode.type}, level: instance"
-            else:
-                itemDescription = f"id: {itemID}, type: {itemNode.type}, is part of: {itemNode.owner}"
-            itemList.append(itemDescription)
-        itemLists.append(itemList)
+    itemDict = {}
+    instanceList = []
+    for keptInstance in keptSG:
+        instanceList.append(recursive_add_item(sceneGraphDatabase.instanceNodes[keptInstance]))
+    itemDict["instances"] = instanceList
+    scene_graph_json = json.dumps(itemDict, indent=2)
     promptText = f"""
-# Robotic Task Planning: Instance Selection
+# Robotic Task Planning: Task Planning
 
 ## Task Objective
 {task}
 
-## Task Related Environment
-
-{('\n'.join(';'.join(itemList) for itemList in itemLists))}
-
+## Task Related Environment Scene Graph Tree
+```json
+{scene_graph_json}
+```
 ## Your Task
 Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
 For each step include:
@@ -213,4 +223,107 @@ End with a short confirmation line: “Plan complete.”
             "parts": [{"text": promptText}]
         }
     ]
-    
+
+
+def recursive_add_item_replanning(node) -> dict:   
+    """
+    INPUTS: 
+        node, node
+    """
+    itemDict = {}
+    partList = []
+    relations = []
+    for keptnode in node.keptSG:
+        partList.append(recursive_add_item(node.partNodes[keptnode]))
+    if node.owner == "":
+        itemDescription = f"id: {node.nodeID}, type: {node.type}, level: instance"
+    else:
+        itemDescription = f"id: {node.nodeID}, type: {node.type}"
+    for u, v, data in node.partGraph.edges(data=True):
+        joint_type = data.get('joint_type', 'N/A')
+        is_controllable = data.get('controllable', False)
+        root = data.get('root', '')
+        subject_function = data.get('subject_function', [])
+        object_function = data.get('object_function', [])
+        subject_desc = data.get('subject_desc', '')
+        object_desc = data.get('object_desc', '')
+        relation = {
+            'subject_id': u,
+            'object_id': v,
+            'joint_type': joint_type,
+            'is_controllable': is_controllable,
+            'root': root,
+            'subject_function': subject_function,
+            'object_function': object_function,
+            'subject_desc': subject_desc,
+            'object_desc': object_desc
+        }
+        relations.append(relation)
+
+    itemDict["description"] = itemDescription
+    itemDict["parts"] = partList
+    itemDict["kinematic_relations"] = relations
+    return itemDict
+
+
+def task_replanning(keptSG, sceneGraphDatabase, task: str, currentPlan: str):
+    """
+    INPUTS: 
+        keptSG, list of dict
+        sceneGraphDatabase: SceneGraphDatabase
+        task: str, task
+    TODO: add the kinematic relations into consideration. Proposed solution: update the kinematic relations for the previous level in each round
+    """
+    itemDict = {}
+    instanceList = []
+    relations = []
+    for keptInstance in keptSG:
+        instanceList.append(recursive_add_item_replanning(sceneGraphDatabase.instanceNodes[keptInstance]))
+    for u, v, data in sceneGraphDatabase.instancesGraph:
+        subject = data.get("subject", "")
+        object = data.get("object", "")
+        predicate = data.get("predicate", "")
+        relation = {
+            "subject": subject,
+            "object": object,
+            "predicate": predicate
+        }
+        relations.append(relation)
+    itemDict["instances"] = instanceList
+    itemDict["relations"] = relations
+    scene_graph_json = json.dumps(itemDict, indent=2)
+    promptText = f"""
+# Robotic Task Planning: Refine Task Planning
+
+## Task Objective
+{task}
+
+## Current Plan
+{currentPlan}
+
+## Task Related Environment Scene Graph Tree With Kinematic Relations
+```json
+{scene_graph_json}
+```
+## Your Task
+Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
+For each step include:
+1. Action verb (e.g., pick, place, navigate, open, close).
+2. Target object(s) or location(s) (use exact names from the environment list).
+3. Any pre-conditions or spatial constraints (e.g., “after opening the drawer”, “while holding the cup”).
+
+Format the plan as a numbered list:
+
+1. ...
+2. ...
+3. ...
+
+End with a short confirmation line: “Plan complete.”
+""".strip()
+
+    return [
+        {
+            "role": "user",
+            "parts": [{"text": promptText}]
+        }
+    ]
