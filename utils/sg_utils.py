@@ -7,12 +7,12 @@ class Node():
     ATTRIBUTES: 
         nodeID: unique id of the instance/part. Instance id will be an string index; Part id will be sample_{x}_mask{y}
         nodeType: the name of the instance/part
-        partGraph: an nx.DiGraph. Nodes of the DiGraph will be Nodes storing the parts of the instance/part described by this Node. Edges of the DiGraph will be the (kinematic) relationships among the parts. NOTE: only nodes effective to the current task would be placed in the nx.DiGraph()
+        partGraph: an nx.MultiDiGraph. Nodes of the MultiDiGraph will be Nodes storing the parts of the instance/part described by this Node. Edges of the MultiDiGraph will be the (kinematic) relationships among the parts. NOTE: only nodes effective to the current task would be placed in the nx.MultiDiGraph()
         partNodes: a dict that stores all the parts of this node
         keptSG: a list storing the effective parts for a certain task, need to be refreshed for each pruning
         owner: id of the father node; "" for instances
     """
-    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.DiGraph = nx.DiGraph(), partNodes = {}, owner: str = ""):
+    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.MultiDiGraph = nx.MultiDiGraph(), partNodes = {}, owner: str = ""):
         self.nodeID = nodeID
         self.nodeType = nodeType
         self.partGraph = partGraph
@@ -32,7 +32,7 @@ def recursive_tree_constructor_without_kinematic(part, ownerID) -> Node:
     """
     instanceID = part.get("id", "")
     instanceType = part.get("kaf_name", "")
-    partGraph = nx.DiGraph()
+    partGraph = nx.MultiDiGraph()
     partList = part.get("parts", [])
     partNodes = {}
     for subpart in partList:
@@ -96,7 +96,7 @@ def recursive_tree_constructor_with_kinematic(part, ownerID) -> Node:
     instanceID = part.get("id", "")
     instanceType = part.get("kaf_name", "")
     kinematicRelations = part.get("kinematic_relations", [])
-    partGraph = nx.DiGraph()
+    partGraph = nx.MultiDiGraph()
     partList = part.get("parts", [])
     partNodes = {}
     for subpart in partList:
@@ -136,10 +136,10 @@ class SceneGraphDatabase:
         INPUT: 
             sceneGraph: loaded json 
         ATTRIBUTES:
-            instancesGraph: an nx.DiGraph. Nodes will be instances in the scene graph; Edges will be instance level relations
+            instancesGraph: an nx.MultiDiGraph. Nodes will be instances in the scene graph; Edges will be instance level relations
             instanceNodes: a dict. Stores all the instance-level objectsd. Helps in LLM pruning for task planning
         """
-        self.instancesGraph = nx.DiGraph()
+        self.instancesGraph = nx.MultiDiGraph()
         self.instanceNodes = {}
         if sceneGraph:
             self.load_from_scene_graph(sceneGraph, 1)

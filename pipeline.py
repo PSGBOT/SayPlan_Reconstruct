@@ -44,7 +44,7 @@ class Pipeline():
     def recursive_prune_node(self, instanceNode):
         """
         EFFECTS:
-            Helper function to prune the environment graph with LLM recursively, add nodes to nx.DiGraph.
+            Helper function to prune the environment graph with LLM recursively, add nodes to nx.MultiDiGraph.
         """
         instanceNode.keptSG = []
         msg = decision_prune_graph_part_level(self.task, instanceNode)
@@ -79,6 +79,7 @@ class Pipeline():
         plan = self.plan()
         print(plan)
         replan = self.replan(jsonPath, plan)
+        print(replan)
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
