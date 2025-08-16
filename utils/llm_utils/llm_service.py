@@ -11,7 +11,7 @@ from config import (
     VLM_SETTINGS_MIS,
     LLM_SETTINGS_MIS,
 )
-import utils.llm_utils.gemini_message as gemini_message
+import llm_utils.gemini_message as gemini_message
 
 
 class BaseVLMClient:
@@ -31,7 +31,7 @@ class BaseVLMClient:
 
 class GeminiVLMClient(BaseVLMClient):
     def __init__(self):
-        api_key = "AIzaSyAPxvx2nG4rQzkhu0Nm17n_o9G9vh_ajIs"
+        api_key = os.environ.get("GENAI_API_KEY")
         if not api_key:
             raise RuntimeError("GENAI_API_KEY environment variable not set")
         self.client = genai.Client(api_key=api_key)
