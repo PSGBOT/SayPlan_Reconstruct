@@ -10,7 +10,7 @@ def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanc
     instances = []
     instanceLevelRelations = []
     for instID, node in currentInstanceDict.items():
-        instanceDescription = f"id: {instID}, instance type: {node.instanceType}"
+        instanceDescription = f"id: {instID}, instance type: {node.nodeType}"
         instances.append(instanceDescription)
     for _, _, data in sceneGraphDatabase.instancesGraph.edges(data=True):
         subject = data.get('subject', 'unknown')
