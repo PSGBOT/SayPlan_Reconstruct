@@ -18,7 +18,7 @@ def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanc
         predicate = data.get('predicate', 'unknown')
         relationDescription = f"subject: {subject}, object: {object}, predicate: {predicate}"
         instanceLevelRelations.append(relationDescription)
-    
+
     promptText = f"""
 # Robotic Task Planning: Instance Selection
 
@@ -27,7 +27,7 @@ def decision_prune_graph_instance_level(task, sceneGraphDatabase, currentInstanc
 
 ## Available Instances
 
-{";".join(instanceDescription)}
+{";".join(instances)}
 
 ## Relationships among the Instances
 
@@ -90,8 +90,12 @@ def decision_prune_graph_part_level(task, currentInstance):
     partNodes = currentInstance.partNodes
     # partGraph = currentInstance.partGraph
     for partID, partNode in partNodes.items():
-        partDescription = f"id: {partID}, type: {partNode.type}, from kept object id: {currentInstance.nodeID}, type: {currentInstance.type}"
+        partDescription = f"id: {partID}, type: {partNode.nodeType}, from kept object id: {currentInstance.nodeID}, type: {currentInstance.nodeType}"
         parts.append(partDescription)
+    if parts == []:
+        partStr = "There is no parts"
+    else:
+        partStr = {";".join(parts)}
     # for _, _, data in partGraph.edges(data=True):
     #     subject = data.get("subject", "")
     #     object = data.get("object", "")
@@ -112,7 +116,7 @@ def decision_prune_graph_part_level(task, currentInstance):
 
 ## Available Parts
 
-{";".join(parts)}
+{partStr}
 
 ## Scene Graph Context
 Only parts of the kept instances and parts are listed in previous sections, and their relations are given
@@ -170,9 +174,9 @@ def recursive_add_item(node) -> dict:
     for keptnode in node.keptSG:
         partList.append(recursive_add_item(node.partNodes[keptnode]))
     if node.owner == "":
-        itemDescription = f"id: {node.nodeID}, type: {node.type}, level: instance"
+        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}, level: instance"
     else:
-        itemDescription = f"id: {node.nodeID}, type: {node.type}"
+        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}"
     itemDict["description"] = itemDescription
     itemDict["parts"] = partList
     return itemDict
@@ -236,9 +240,9 @@ def recursive_add_item_replanning(node) -> dict:
     for keptnode in node.keptSG:
         partList.append(recursive_add_item(node.partNodes[keptnode]))
     if node.owner == "":
-        itemDescription = f"id: {node.nodeID}, type: {node.type}, level: instance"
+        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}, level: instance"
     else:
-        itemDescription = f"id: {node.nodeID}, type: {node.type}"
+        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}"
     for u, v, data in node.partGraph.edges(data=True):
         joint_type = data.get('joint_type', 'N/A')
         is_controllable = data.get('controllable', False)
@@ -279,7 +283,7 @@ def task_replanning(keptSG, sceneGraphDatabase, task: str, currentPlan: str):
     relations = []
     for keptInstance in keptSG:
         instanceList.append(recursive_add_item_replanning(sceneGraphDatabase.instanceNodes[keptInstance]))
-    for u, v, data in sceneGraphDatabase.instancesGraph:
+    for u, v, data in sceneGraphDatabase.instancesGraph.edges(data=True):
         subject = data.get("subject", "")
         object = data.get("object", "")
         predicate = data.get("predicate", "")

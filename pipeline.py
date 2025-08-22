@@ -61,24 +61,26 @@ class Pipeline():
         """
         EFFECTS: 
             task planning
-        TODO: Add iterative re-planning, add kinematic tree to the re-planning only
         """
         planMsg = task_planning(self.keptSG, self.sceneGraphDatabase, self.task)
-        plan = self.llmClient.infer(planMsg)
+        plan = self.llmClient.decide_plan(planMsg)
         return plan
     
     def replan(self, jsonPath, plan):
-        jsonData = json.load(jsonPath)
+        with open(jsonPath, 'r', encoding='utf-8') as f:
+            jsonData = json.load(f)
         self.sceneGraphDatabase.add_kinematic_relations(jsonData, self.keptSG)
         replanMsg = task_replanning(self.keptSG, self.sceneGraphDatabase, self.task, plan)
-        replan = self.llmClient.infer(replanMsg)
+        replan = self.llmClient.decide_plan(replanMsg)
         return replan
     
     def run(self, jsonPath):
         self.prune_graph()
         plan = self.plan()
+        print("plan: ")
         print(plan)
         replan = self.replan(jsonPath, plan)
+        print("plan after replanning: ")
         print(replan)
         
 if __name__ == "__main__":
