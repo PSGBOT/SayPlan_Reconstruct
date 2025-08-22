@@ -12,7 +12,7 @@ from config import (
     VLM_SETTINGS_MIS,
     LLM_SETTINGS_MIS,
 )
-import llm_utils.gemini_message as gemini_message
+import utils.llm_utils.gemini_message as gemini_message
 
 
 class BaseVLMClient:
