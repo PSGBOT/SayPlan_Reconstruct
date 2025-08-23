@@ -208,7 +208,7 @@ def task_planning(keptSG, sceneGraphDatabase, task: str):
 ## Your Task
 Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
 For each step include:
-1. Action verb (e.g., pick, place, navigate, open, close).
+1. High-level action verb (e.g., pick, place, navigate, open, close).
 2. Target object(s) or location(s) (use exact names from the environment list).
 3. Any pre-conditions or spatial constraints (e.g., “after opening the drawer”, “while holding the cup”).
 
@@ -312,7 +312,7 @@ def task_replanning(keptSG, sceneGraphDatabase, task: str, currentPlan: str):
 ## Your Task
 Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
 For each step include:
-1. Action verb (e.g., pick, place, navigate, open, close).
+1. Action verb, showing how to manipulate the parts/objects kinematically (e.g., horizontally rotate).
 2. Target object(s) or location(s) (use exact names from the environment list).
 3. Any pre-conditions or spatial constraints (e.g., “after opening the drawer”, “while holding the cup”).
 
