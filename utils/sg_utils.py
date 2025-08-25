@@ -12,9 +12,10 @@ class Node():
         keptSG: a list storing the effective parts for a certain task, need to be refreshed for each pruning
         owner: id of the father node; "" for instances
     """
-    def __init__(self, nodeID: str = "-1", nodeType: str = "null", partGraph: nx.MultiDiGraph = nx.MultiDiGraph(), partNodes = {}, owner: str = ""):
+    def __init__(self, nodeID: str = "-1", nodeType: str = "null", description: str = "nil", partGraph: nx.MultiDiGraph = nx.MultiDiGraph(), partNodes = {}, owner: str = ""):
         self.nodeID = nodeID
         self.nodeType = nodeType
+        self.description = description
         self.partGraph = partGraph
         self.partNodes = partNodes
         self.keptSG = []
@@ -32,6 +33,10 @@ def recursive_tree_constructor_without_kinematic(part, ownerID) -> Node:
     """
     instanceID = part.get("id", "")
     instanceType = part.get("kaf_name", "")
+    if ownerID == "":
+        instanceDescription = part.get("description", "")
+    else:
+        instanceDescription = "nil"
     partGraph = nx.MultiDiGraph()
     partList = part.get("parts", [])
     partNodes = {}
@@ -42,6 +47,7 @@ def recursive_tree_constructor_without_kinematic(part, ownerID) -> Node:
     instanceNode = Node(
         nodeID=str(instanceID),
         nodeType=instanceType,
+        description=instanceDescription,
         partGraph=partGraph,
         partNodes=partNodes,
         owner=ownerID

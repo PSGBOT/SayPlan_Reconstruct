@@ -174,7 +174,7 @@ def recursive_add_item(node) -> dict:
     for keptnode in node.keptSG:
         partList.append(recursive_add_item(node.partNodes[keptnode]))
     if node.owner == "":
-        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}, level: instance"
+        itemDescription = f"id: {node.nodeID}, type: {node.nodeType}, description: {node.description}, level: instance"
     else:
         itemDescription = f"id: {node.nodeID}, type: {node.nodeType}"
     itemDict["description"] = itemDescription
@@ -187,7 +187,6 @@ def task_planning(keptSG, sceneGraphDatabase, task: str):
         keptSG, list of dict
         sceneGraphDatabase: SceneGraphDatabase
         task: str, task
-    TODO: add the kinematic relations into consideration. Proposed solution: update the kinematic relations for the previous level in each round
     """
     itemDict = {}
     instanceList = []
@@ -310,7 +309,7 @@ def task_replanning(keptSG, sceneGraphDatabase, task: str, currentPlan: str):
 {scene_graph_json}
 ```
 ## Your Task
-Think step-by-step and produce a concise, ordered action plan that the robot can execute to achieve the objective.  
+Refer to the current plan. Think step-by-step to make it a kinematically feasible and detailed action plan that the robot can execute to achieve the objective.  
 For each step include:
 1. Action verb, showing how to manipulate the parts/objects kinematically (e.g., horizontally rotate).
 2. Target object(s) or location(s) (use exact names from the environment list).
