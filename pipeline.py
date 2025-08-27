@@ -66,10 +66,12 @@ class Pipeline():
         plan = self.llmClient.decide_plan(planMsg)
         return plan
     
-    def replan(self, jsonPath, plan):
+    def AddKinematicRelations(self, jsonPath):
         with open(jsonPath, 'r', encoding='utf-8') as f:
             jsonData = json.load(f)
         self.sceneGraphDatabase.add_kinematic_relations(jsonData, self.keptSG)
+    
+    def replan(self, plan):
         replanMsg = task_replanning(self.keptSG, self.sceneGraphDatabase, self.task, plan)
         replan = self.llmClient.decide_plan(replanMsg)
         return replan
@@ -79,7 +81,8 @@ class Pipeline():
         plan = self.plan()
         print("plan: ")
         print(plan)
-        replan = self.replan(jsonPath, plan)
+        self.AddKinematicRelations(jsonPath)
+        replan = self.replan(plan)
         print("plan after replanning: ")
         print(replan)
         
