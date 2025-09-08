@@ -2,3 +2,4 @@
 utils/config
 *.txt
 sample_scene_graph.json
+*/__pychache__

@@ -39,7 +39,32 @@ class Pipeline():
             selectedNode = self.sceneGraphDatabase.instanceNodes[selectedID]
             self.recursive_prune_node(selectedNode)
             self.keptSG.append(selectedID)
-
+        pruned_json = []
+        for instanceID in self.keptSG:
+            instanceNode = self.sceneGraphDatabase.instanceNodes[instanceID]
+            pruned_json.append({
+                instanceID: {
+                    "parts": self.build_pruned_json(instanceNode)
+                }
+            })
+        return pruned_json
+    
+    def build_pruned_json(self, node):
+        """
+        INPUT:
+            node: The current node to process.
+        OUTPUT:
+            A list of dictionaries representing the pruned parts of the node.
+        """
+        part_json = []
+        for partID in node.keptSG:
+            partNode = node.partNodes[partID]
+            part_json.append({
+                partID: {
+                    "parts": self.build_pruned_json(partNode)
+                }
+            })
+        return part_json
             
     def recursive_prune_node(self, instanceNode):
         """
@@ -75,6 +100,7 @@ class Pipeline():
         replanMsg = task_replanning(self.keptSG, self.sceneGraphDatabase, self.task, plan)
         replan = self.llmClient.decide_plan(replanMsg)
         return replan
+        return replan
     
     def run(self, jsonPath):
         self.prune_graph()
@@ -93,9 +119,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sgPath", type=str, required=True, help="Path to the scene graph JSON file"
     )
-    parser.add_argument(
-        "--sgKinematicPath", type=str, required=True, help="Path to the scene graph kinematic relations JSON file"
-    )
+    # parser.add_argument(
+    #     "--sgKinematicPath", type=str, required=True, help="Path to the scene graph kinematic relations JSON file"
+    # )
     parser.add_argument(
         "--task",
         type=str,
@@ -105,4 +131,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     pipeline = Pipeline(args.sgPath, args.task)
-    pipeline.run(args.sgKinematicPath)
+    kept_ids = pipeline.prune_graph()
+    print(kept_ids)
+    plan = pipeline.plan()
+    print(plan)

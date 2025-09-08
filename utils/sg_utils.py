@@ -32,9 +32,9 @@ def recursive_tree_constructor_without_kinematic(part, ownerID) -> Node:
         output: a Node storing all information about a part and its parts
     """
     instanceID = part.get("id", "")
-    instanceType = part.get("kaf_name", "")
+    instanceType = part.get("instance description", {}).get("name", part.get("kaf_name", ""))
     if ownerID == "":
-        instanceDescription = part.get("description", "")
+        instanceDescription = part.get("instance description", "")
     else:
         instanceDescription = "nil"
     partGraph = nx.MultiDiGraph()
@@ -100,7 +100,7 @@ def recursive_tree_constructor_with_kinematic(part, ownerID) -> Node:
         output: a Node storing all information about a part and its parts
     """
     instanceID = part.get("id", "")
-    instanceType = part.get("kaf_name", "")
+    instanceType = part.get("instance description", {}).get("name", part.get("kaf_name", ""))
     kinematicRelations = part.get("kinematic_relations", [])
     partGraph = nx.MultiDiGraph()
     partList = part.get("parts", [])
