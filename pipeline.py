@@ -4,6 +4,7 @@ import argparse
 from utils import sg_utils
 from utils.llm_utils.llm_service import *
 from utils.llm_utils.gemini_message import *
+from kept_id_process import post_processing
 
 class Pipeline():
     """
@@ -100,7 +101,6 @@ class Pipeline():
         replanMsg = task_replanning(self.keptSG, self.sceneGraphDatabase, self.task, plan)
         replan = self.llmClient.decide_plan(replanMsg)
         return replan
-        return replan
     
     def run(self, jsonPath):
         self.prune_graph()
@@ -131,7 +131,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     pipeline = Pipeline(args.sgPath, args.task)
-    kept_ids = pipeline.prune_graph()
-    print(kept_ids)
+    keptIDs = pipeline.prune_graph()
+    print(keptIDs)
+    idPath = "C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset/id 6"
+    post_processing(str(keptIDs), idPath)
     plan = pipeline.plan()
     print(plan)
