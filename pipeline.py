@@ -134,6 +134,7 @@ if __name__ == "__main__":
     keptIDs = pipeline.prune_graph()
     print(keptIDs)
     idPath = "C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset/id 6"
-    post_processing(str(keptIDs), idPath)
+    outputPath = "C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset_for_kaf/id 6"
+    post_processing(str(keptIDs), idPath, outputPath)
     plan = pipeline.plan()
     print(plan)
