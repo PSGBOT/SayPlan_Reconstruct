@@ -4,8 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "Python Debugger: Current File",
+            "name": "Python Debugger: id 6",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
@@ -15,6 +16,253 @@
                 "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 6\\scene_graph.json",
                 "--task",
                 "Unplug the charger from the ASUS Laptop"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 342",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 342\\scene_graph.json",
+                "--task",
+                "Untie the curtains"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 344",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 344\\scene_graph.json",
+                "--task",
+                "Put the towel beside the sink"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 519",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 519\\scene_graph.json",
+                "--task",
+                "Place the chair with blue back to the front of the fridge"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 533",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 533\\scene_graph.json",
+                "--task",
+                "Close the leftmost laptop"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 615",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 615\\scene_graph.json",
+                "--task",
+                "Move the coffee cup to the back of the laptop"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 936",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 936\\scene_graph.json",
+                "--task",
+                "Put the notice behind the cases"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1339",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1339\\scene_graph.json",
+                "--task",
+                "Turn on the lights"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1374",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1374\\scene_graph.json",
+                "--task",
+                "Put the earphones on the keyboard of the laptop"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1398",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1398\\scene_graph.json",
+                "--task",
+                "Hang the towel to the door of the shower room"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1446",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1446\\scene_graph.json",
+                "--task",
+                "Put keys next to the glasses"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1464",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1464\\scene_graph.json",
+                "--task",
+                "Open the door of the microwave"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1467",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1467\\scene_graph.json",
+                "--task",
+                "Open the door of the fridge"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1493",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1493\\scene_graph.json",
+                "--task",
+                "Collect the clothes"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1503",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1503\\scene_graph.json",
+                "--task",
+                "Put potted plant to the coffee table near the sofa"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1692",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1692\\scene_graph.json",
+                "--task",
+                "Tie the curtain"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1719",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1719\\scene_graph.json",
+                "--task",
+                "Close the laptop"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1787",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1787\\scene_graph.json",
+                "--task",
+                "Move the sofa closer to the coffee table"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1919",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1919\\scene_graph.json",
+                "--task",
+                "Move the TV set closer to the sofa"
+            ]
+        },
+        {
+            "name": "Python Debugger: id 1993",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--sgPath",
+                "C:\\PartLevelProject\\scene_part_seg_dataset\\kaf_out\\results\\vg_minitest\\50-id 1993\\scene_graph.json",
+                "--task",
+                "Hang the headphone onto the screen"
             ]
         }
     ]

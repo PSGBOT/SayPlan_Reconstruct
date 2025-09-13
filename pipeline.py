@@ -132,9 +132,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     pipeline = Pipeline(args.sgPath, args.task)
     keptIDs = pipeline.prune_graph()
+    print("keptIDs: ")
     print(keptIDs)
-    idPath = "C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset/id 6"
-    outputPath = "C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset_for_kaf/id 6"
-    post_processing(str(keptIDs), idPath, outputPath)
+    dirPath = os.path.dirname(args.sgPath)
+    dirName = os.path.basename(dirPath)
+    id = dirName.split(' ')[-1]
+    idPath = f"C:/PartLevelProject/scene_part_seg_dataset/kaf_out/results/vg_minitest/50-id {id}"
+    outputPath = f"C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset_for_kaf/id {id}"
+    maskPath = f"C:/PartLevelProject/scene_part_seg_dataset/sample_part_seg_dataset/id {id}"
+    post_processing(str(keptIDs), idPath, maskPath, outputPath)
     plan = pipeline.plan()
     print(plan)
+    jsonPath = args.sgPath
+    pipeline.AddKinematicRelations(jsonPath)
+    replan = pipeline.replan(plan)
+    outputPlanPath = os.path.join(outputPath, "final_plan.txt")
+    with open(outputPlanPath, 'w') as f:
+        f.write(replan)
+    print(replan)

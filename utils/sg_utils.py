@@ -32,13 +32,16 @@ def recursive_tree_constructor_without_kinematic(part, ownerID) -> Node:
         output: a Node storing all information about a part and its parts
     """
     instanceID = part.get("id", "")
-    instanceType = part.get("instance description", {}).get("name", part.get("kaf_name", ""))
+    instanceDes = part.get("instance description", {})
+    if instanceDes == "":
+        instanceDes = {}
+    instanceType = instanceDes.get("name", part.get("kaf_name", ""))
     if ownerID == "":
         instanceDescription = part.get("instance description", "")
     else:
         instanceDescription = "nil"
     partGraph = nx.MultiDiGraph()
-    partList = part.get("parts", [])
+    partList = part.get("children", [])
     partNodes = {}
     for subpart in partList:
         partNode = recursive_tree_constructor_without_kinematic(subpart, instanceID)
@@ -62,7 +65,7 @@ def recursive_tree_constructor_add_kinematic(parts, node):
     EFFECTS:
         Recursively parse through the input json to construct the kinematic relations under this node
     """
-    partList = parts.get("parts", [])
+    partList = parts.get("children", [])
     kinematicRelations = parts.get("kinematic_relations", [])
     partGraph = node.partGraph
     for part in node.keptSG:
@@ -103,7 +106,7 @@ def recursive_tree_constructor_with_kinematic(part, ownerID) -> Node:
     instanceType = part.get("instance description", {}).get("name", part.get("kaf_name", ""))
     kinematicRelations = part.get("kinematic_relations", [])
     partGraph = nx.MultiDiGraph()
-    partList = part.get("parts", [])
+    partList = part.get("children", [])
     partNodes = {}
     for subpart in partList:
         partNode = recursive_tree_constructor_with_kinematic(subpart, instanceID)

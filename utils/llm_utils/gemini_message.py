@@ -312,8 +312,9 @@ def task_replanning(keptSG, sceneGraphDatabase, task: str, currentPlan: str):
 Refer to the current plan. Think step-by-step to make it a kinematically feasible and detailed action plan that the robot can execute to achieve the objective.  
 For each step include:
 1. Action verb, showing how to manipulate the parts/objects kinematically (e.g., horizontally rotate).
-2. Target object(s) or location(s) (use exact names from the environment list).
+2. Target object(s), part(s) from the objects that are going to be operated on, or location(s) (use exact names from the environment list).
 3. Any pre-conditions or spatial constraints (e.g., “after opening the drawer”, “while holding the cup”).
+4. The detailed object/part ids.
 
 Format the plan as a numbered list:
 
